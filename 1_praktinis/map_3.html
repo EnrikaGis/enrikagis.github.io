@@ -1,11 +1,240 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Žemėlapis</title>
-</head>
-<body>
-    Trečiasis žemėlapio puslapis 
-</body>
-</html>
+
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="UTF-8"/>
+        <title>Kepler.gl embedded map</title>
+
+        <!--Uber Font-->
+        <link rel="stylesheet" href="https://d1a3f4spazzrp4.cloudfront.net/kepler.gl/uber-fonts/4.0.0/superfine.css">
+
+        <!--Kepler css-->
+        <link href="https://unpkg.com/kepler.gl@3.1.1/umd/keplergl.min.css" rel="stylesheet">
+
+        <!--MapBox css-->
+        <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v1.1.1/mapbox-gl.css" rel="stylesheet">
+        <link href="https://unpkg.com/maplibre-gl@^3/dist/maplibre-gl.css" rel="stylesheet">
+
+        <!-— facebook open graph tags -->
+        <meta property="og:url" content="http://kepler.gl/" />
+        <meta property="og:title" content="Large-scale WebGL-powered Geospatial Data Visualization Tool" />
+        <meta property="og:description" content="Kepler.gl is a powerful web-based geospatial data analysis tool. Built on a high performance rendering engine and designed for large-scale data sets." />
+        <meta property="og:site_name" content="kepler.gl" />
+        <meta property="og:image" content="https://d1a3f4spazzrp4.cloudfront.net/kepler.gl/kepler.gl-meta-tag.png" />
+        <meta property="og:image:type" content="image/png" />
+        <meta property="og:image:width" content="800" />
+        <meta property="og:image:height" content="800" />
+
+        <!-— twitter card tags -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@openjsf">
+        <meta name="twitter:creator" content="@openjsf">
+        <meta name="twitter:title" content="Large-scale WebGL-powered Geospatial Data Visualization Tool">
+        <meta name="twitter:description" content="Kepler.gl is a powerful web-based geospatial data analysis tool. Built on a high performance rendering engine and designed for large-scale data sets.">
+        <meta name="twitter:image" content="https://d1a3f4spazzrp4.cloudfront.net/kepler.gl/kepler.gl-meta-tag.png" />
+
+        <!-- Load React/Redux -->
+        <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+        <script src="https://unpkg.com/redux@4.2.1/dist/redux.js" crossorigin></script>
+        <script src="https://unpkg.com/react-redux@8.1.2/dist/react-redux.min.js" crossorigin></script>
+        <script src="https://unpkg.com/styled-components@6.1.8/dist/styled-components.min.js" crossorigin></script>
+
+        <!-- Load Kepler.gl -->
+        <script src="https://unpkg.com/kepler.gl@3.1.1/umd/keplergl.min.js" crossorigin></script>
+
+        <style type="text/css">
+          body {margin: 0; padding: 0; overflow: hidden;}
+        </style>
+
+        <!--MapBox token-->
+        <script>
+          /**
+           * Provide your MapBox Token
+           **/
+          const MAPBOX_TOKEN = 'pk.eyJ1IjoidWNmLW1hcGJveCIsImEiOiJjbDBiYzlveHgwdnF0M2NtZzUzZWZuNWZ4In0.l9J8ptz3MKwaU9I4PtCcig';
+          const WARNING_MESSAGE = 'Please Provide a Mapbox Token in order to use Kepler.gl. Edit this file and fill out MAPBOX_TOKEN with your access key';
+        </script>
+
+        <!-- GA: Delete this as you wish, However to pat ourselves on the back, we only track anonymous pageview to understand how many people are using kepler.gl. -->
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+          ga('create', 'UA-64694404-19', {
+            'storage': 'none',
+            'clientId': localStorage.getItem('ga:clientId')
+          });
+          ga(function(tracker) {
+              localStorage.setItem('ga:clientId', tracker.get('clientId'));
+          });
+          ga('set', 'checkProtocolTask', null); // Disable file protocol checking.
+          ga('set', 'checkStorageTask', null); // Disable cookie storage checking.
+          ga('set', 'historyImportTask', null); // Disable history checking (requires reading from cookies).
+          ga('set', 'page', 'keplergl-html');
+          ga('send', 'pageview');
+        </script>
+      </head>
+      <body>
+        <!-- We will put our React component inside this div. -->
+        <div id="app">
+          <!-- Kepler.gl map will be placed here-->
+        </div>
+
+        <!-- Load our React component. -->
+        <script>
+          /* Validate Mapbox Token */
+          if ((MAPBOX_TOKEN || '') === '' || MAPBOX_TOKEN === 'PROVIDE_MAPBOX_TOKEN') {
+            alert(WARNING_MESSAGE);
+          }
+
+          /** STORE **/
+          const reducers = (function createReducers(redux, keplerGl) {
+            return redux.combineReducers({
+              // mount keplerGl reducer
+              keplerGl: keplerGl.keplerGlReducer.initialState({
+                uiState: {
+                  readOnly: false,
+                  currentModal: null
+                }
+              })
+            });
+          }(Redux, KeplerGl));
+
+          const middleWares = (function createMiddlewares(keplerGl) {
+            return keplerGl.enhanceReduxMiddleware([
+              // Add other middlewares here
+            ]);
+          }(KeplerGl));
+
+          const enhancers = (function craeteEnhancers(redux, middles) {
+            return redux.applyMiddleware(...middles);
+          }(Redux, middleWares));
+
+          const store = (function createStore(redux, enhancers) {
+            const initialState = {};
+
+            return redux.createStore(
+              reducers,
+              initialState,
+              redux.compose(enhancers)
+            );
+          }(Redux, enhancers));
+          /** END STORE **/
+
+          /** COMPONENTS **/
+          var KeplerElement = (function makeKeplerElement(react, keplerGl, mapboxToken) {
+            var LogoSvg = function LogoSvg() {
+              return react.createElement(
+                "div",
+                { className: "logo-container", style: {position: 'fixed', zIndex: 10000, padding: '4px'} },
+                  react.createElement(
+                    "svg",
+                    {
+                      className: "kepler_gl__logo",
+                      width: "107px",
+                      height: "21px",
+                      viewBox: "0 0 124 24"
+                    },
+                    react.createElement(
+                      "g",
+                      { transform: "translate(13.500000, 13.500000) rotate(45.000000) translate(-13.500000, -13.500000) translate(4.000000, 4.000000)" },
+                      react.createElement("rect", { x: "0", y: "6", transform: "matrix(2.535181e-06 1 -1 2.535181e-06 18.1107 6.0369)", fill: "#535C6C", width: "12.1", height: "12.1" }),
+                      react.createElement("rect", { x: "6", y: "0", transform: "matrix(2.535182e-06 1 -1 2.535182e-06 18.1107 -6.0369)", fill:"#1FBAD6", width: "12.1", height: "12.1" })
+                    ),
+                    react.createElement(
+                      "g",
+                      {},
+                      react.createElement("path", { fill:"#1FBAD6", d: "M39,8.7h2.2l-2.8,4.2l2.9,5.1H39l-2.4-4.2h-1.3V18h-2V5l2-0.1v7.3h1.3L39,8.7z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M42.4,13.3c0-1.5,0.4-2.7,1.1-3.5s1.8-1.2,3.1-1.2c1.3,0,2.2,0.4,2.8,1.1c0.6,0.7,0.9,1.8,0.9,3.3 c0,0.4,0,0.8,0,1.1h-5.8c0,1.6,0.8,2.4,2.4,2.4c1,0,2-0.2,2.9-0.6l0.2,1.7c-0.4,0.2-0.9,0.4-1.4,0.5s-1.1,0.2-1.7,0.2 c-1.5,0-2.6-0.4-3.3-1.2C42.8,16.1,42.4,14.9,42.4,13.3z M46.6,10.1c-0.7,0-1.2,0.2-1.5,0.5c-0.4,0.4-0.6,0.9-0.6,1.7h4 c0-0.8-0.2-1.4-0.5-1.7S47.2,10.1,46.6,10.1z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M57.1,18.2c-1,0-1.8-0.3-2.3-0.9l0,0l0,1.3v2.5h-2V8.7h1.5l0.3,0.9h0c0.3-0.3,0.7-0.6,1.2-0.7 c0.4-0.2,0.9-0.3,1.4-0.3c1.2,0,2.1,0.4,2.7,1.1c0.6,0.7,0.9,2,0.9,3.7c0,1.6-0.3,2.8-1,3.7C59.2,17.8,58.3,18.2,57.1,18.2z M56.7,10.3c-0.4,0-0.8,0.1-1.1,0.2c-0.3,0.2-0.6,0.4-0.8,0.7v4.3c0.2,0.3,0.4,0.5,0.7,0.7c0.3,0.2,0.7,0.3,1.1,0.3 c0.7,0,1.2-0.2,1.6-0.7c0.4-0.5,0.5-1.3,0.5-2.5c0-0.8-0.1-1.4-0.2-1.8s-0.4-0.7-0.7-0.9C57.6,10.4,57.2,10.3,56.7,10.3z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M63.2,16V5l2-0.1v10.8c0,0.3,0.1,0.5,0.2,0.6c0.1,0.1,0.3,0.2,0.6,0.2c0.3,0,0.6,0,0.9-0.1V18 c-0.4,0.1-1,0.2-1.6,0.2c-0.8,0-1.3-0.2-1.7-0.5S63.2,16.8,63.2,16z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M68.2,13.3c0-1.5,0.4-2.7,1.1-3.5c0.7-0.8,1.8-1.2,3.1-1.2c1.3,0,2.2,0.4,2.8,1.1c0.6,0.7,0.9,1.8,0.9,3.3 c0,0.4,0,0.8,0,1.1h-5.8c0,1.6,0.8,2.4,2.4,2.4c1,0,2-0.2,2.9-0.6l0.2,1.7c-0.4,0.2-0.9,0.4-1.4,0.5s-1.1,0.2-1.7,0.2 c-1.5,0-2.6-0.4-3.3-1.2C68.6,16.1,68.2,14.9,68.2,13.3z M72.4,10.1c-0.7,0-1.2,0.2-1.5,0.5c-0.4,0.4-0.6,0.9-0.6,1.7h4 c0-0.8-0.2-1.4-0.5-1.7S73,10.1,72.4,10.1z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M80.2,8.7l0.1,1.7h0c0.3-0.6,0.7-1.1,1.1-1.4c0.4-0.3,1-0.5,1.6-0.5c0.4,0,0.7,0,1,0.1l-0.1,2 c-0.3-0.1-0.7-0.2-1-0.2c-0.7,0-1.3,0.3-1.7,0.8c-0.4,0.5-0.7,1.2-0.7,2.1V18h-2V8.7H80.2z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M83.8,17c0-0.8,0.4-1.2,1.2-1.2c0.8,0,1.2,0.4,1.2,1.2c0,0.8-0.4,1.1-1.2,1.1C84.2,18.2,83.8,17.8,83.8,17z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M88.5,18.7c0-0.8,0.4-1.4,1.2-1.8c-0.6-0.3-0.9-0.8-0.9-1.5c0-0.7,0.4-1.2,1.1-1.6c-0.3-0.3-0.6-0.6-0.7-0.9 c-0.2-0.4-0.2-0.8-0.2-1.3c0-1,0.3-1.8,0.9-2.3c0.6-0.5,1.6-0.8,2.8-0.8c0.5,0,1,0,1.4,0.1c0.4,0.1,0.8,0.2,1.1,0.4l2.4-0.2v1.5 h-1.5c0.2,0.4,0.2,0.8,0.2,1.3c0,1-0.3,1.7-0.9,2.2s-1.5,0.8-2.7,0.8c-0.7,0-1.2-0.1-1.6-0.2c-0.1,0.1-0.2,0.2-0.3,0.3 c-0.1,0.1-0.1,0.2-0.1,0.4c0,0.2,0.1,0.3,0.2,0.4c0.1,0.1,0.3,0.2,0.6,0.2l2.7,0.2c1,0.1,1.7,0.3,2.2,0.6c0.5,0.3,0.8,0.9,0.8,1.7 c0,0.6-0.2,1.1-0.5,1.5c-0.4,0.4-0.9,0.8-1.5,1c-0.7,0.2-1.5,0.4-2.4,0.4c-1.3,0-2.3-0.2-3-0.6C88.8,20.1,88.5,19.5,88.5,18.7z M95.1,18.4c0-0.3-0.1-0.5-0.3-0.7s-0.6-0.2-1.1-0.3l-2.7-0.3c-0.2,0.1-0.4,0.3-0.5,0.5c-0.1,0.2-0.2,0.4-0.2,0.6 c0,0.4,0.2,0.8,0.5,1c0.4,0.2,1,0.3,1.8,0.3C94.2,19.5,95.1,19.2,95.1,18.4z M94.3,11.5c0-0.6-0.1-1-0.4-1.2 c-0.3-0.2-0.7-0.3-1.3-0.3c-0.7,0-1.1,0.1-1.4,0.3c-0.3,0.2-0.4,0.6-0.4,1.2s0.1,1,0.4,1.2c0.3,0.2,0.7,0.3,1.4,0.3 c0.6,0,1.1-0.1,1.3-0.4S94.3,12,94.3,11.5z" }),
+                      react.createElement("path", { fill:"#1FBAD6", d: "M99.4,16V5l2-0.1v10.8c0,0.3,0.1,0.5,0.2,0.6c0.1,0.1,0.3,0.2,0.6,0.2c0.3,0,0.6,0,0.9-0.1V18 c-0.4,0.1-1,0.2-1.6,0.2c-0.8,0-1.3-0.2-1.7-0.5S99.4,16.8,99.4,16z" })
+                    )
+                  )
+                );
+              };
+
+            return function App() {
+              var rootElm = react.useRef(null);
+              var _useState = react.useState({
+                width: window.innerWidth,
+                height: window.innerHeight
+              });
+              var windowDimension = _useState[0];
+              var setDimension = _useState[1];
+              react.useEffect(function sideEffect(){
+                function handleResize() {
+                  setDimension({width: window.innerWidth, height: window.innerHeight});
+                };
+                window.addEventListener('resize', handleResize);
+                return function() {window.removeEventListener('resize', handleResize);};
+              }, []);
+              return react.createElement(
+                'div',
+                {style: {position: 'absolute', left: 0, width: '100vw', height: '100vh'}},
+                
+                react.createElement(keplerGl.KeplerGl, {
+                  mapboxApiAccessToken: mapboxToken,
+                  id: "map",
+                  width: windowDimension.width,
+                  height: windowDimension.height
+                })
+              )
+            }
+          }(React, KeplerGl, MAPBOX_TOKEN));
+
+          const app = (function createReactReduxProvider(react, reactRedux, KeplerElement) {
+            return react.createElement(
+              reactRedux.Provider,
+              {store},
+              react.createElement(KeplerElement, null)
+            )
+          }(React, ReactRedux, KeplerElement));
+          /** END COMPONENTS **/
+
+          /** Render **/
+          (function render(react, reactDOM, app) {
+            const container = document.getElementById('app');
+            const root = reactDOM.createRoot(container);
+            root.render(app);
+          }(React, ReactDOM, app));
+        </script>
+        <!-- The next script will show how to interact directly with Kepler map store -->
+        <script>
+          /**
+           * Customize map.
+           * In the following section you can use the store object to dispatch Kepler.gl actions
+           * to add new data and customize behavior
+           */
+          (function customize(keplerGl, store) {
+            const datasets = [{"version":"v1","data":{"id":"rewr32","label":"Vandens_Stotys_Lietuviskai.geojson","color":[143,47,191],"allData":[[{"type":"Feature","properties":{"Vandens matavimo stotis":"Likėnai","Vandens telkinio pavadinimas":"Smardonė","Vandens telkinys":"Upė, kanalas","timestamp":"1994-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.6211099,56.1854458]}},"Likėnai","Smardonė","Upė, kanalas","1994-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Aunuvėnai","Vandens telkinio pavadinimas":"Aunuva","Vandens telkinys":"Upė, kanalas","timestamp":"1973-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.7654127,55.8503691]}},"Aunuvėnai","Aunuva","Upė, kanalas","1973-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Ukmergė","Vandens telkinio pavadinimas":"Šventoji","Vandens telkinys":"Upė, kanalas","timestamp":"1924-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.7686875,55.2474471]}},"Ukmergė","Šventoji","Upė, kanalas","1924-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Zervynos","Vandens telkinio pavadinimas":"Ūla-Pelesa","Vandens telkinys":"Upė, kanalas","timestamp":"1959-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.4983441,54.1105583]}},"Zervynos","Ūla-Pelesa","Upė, kanalas","1959-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Lankupiai","Vandens telkinio pavadinimas":"Minija","Vandens telkinys":"Upė, kanalas","timestamp":"1905-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.3659708,55.4832924]}},"Lankupiai","Minija","Upė, kanalas","1905-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Nida","Vandens telkinio pavadinimas":"Baltijos jūra","Vandens telkinys":"Jūra, Kuršių Marios","timestamp":"2018-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[20.9773148,55.3077598]}},"Nida","Baltijos jūra","Jūra, Kuršių Marios","2018-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Lynupis","Vandens telkinio pavadinimas":"Lynupis","Vandens telkinys":"Upė, kanalas","timestamp":"2021-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.5717739,54.0621112]}},"Lynupis","Lynupis","Upė, kanalas","2021-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Puvočiai","Vandens telkinio pavadinimas":"Merkys","Vandens telkinys":"Upė, kanalas","timestamp":"1944-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.3007072,54.116597]}},"Puvočiai","Merkys","Upė, kanalas","1944-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Mikužiai","Vandens telkinio pavadinimas":"Veiviržas","Vandens telkinys":"Upė, kanalas","timestamp":"1944-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.5221664,55.5592226]}},"Mikužiai","Veiviržas","Upė, kanalas","1944-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kačergiškė","Vandens telkinio pavadinimas":"Dysna","Vandens telkinys":"Upė, kanalas","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[26.4268851,55.3555497]}},"Kačergiškė","Dysna","Upė, kanalas","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Rusnė","Vandens telkinio pavadinimas":"Nemuno atšaka Skirvytė","Vandens telkinys":"Upė, kanalas","timestamp":"2009-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.3712118,55.2870303]}},"Rusnė","Nemuno atšaka Skirvytė","Upė, kanalas","2009-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Pabradė","Vandens telkinio pavadinimas":"Žeimena","Vandens telkinys":"Upė, kanalas","timestamp":"1939-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.7735779,54.9839448]}},"Pabradė","Žeimena","Upė, kanalas","1939-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Paakmenis","Vandens telkinio pavadinimas":"Akmena","Vandens telkinys":"Upė, kanalas","timestamp":"1949-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.2942677,55.4901163]}},"Paakmenis","Akmena","Upė, kanalas","1949-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Smalininkai","Vandens telkinio pavadinimas":"Nemunas","Vandens telkinys":"Upė, kanalas","timestamp":"1811-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.5859019,55.0722839]}},"Smalininkai","Nemunas","Upė, kanalas","1811-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Nida","Vandens telkinio pavadinimas":"Kuršių marios","Vandens telkinys":"Jūra, Kuršių Marios","timestamp":"2018-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.0111142,55.3017071]}},"Nida","Kuršių marios","Jūra, Kuršių Marios","2018-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Skirgailai","Vandens telkinio pavadinimas":"Šešuvis","Vandens telkinys":"Upė, kanalas","timestamp":"1938-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.3054036,55.2089082]}},"Skirgailai","Šešuvis","Upė, kanalas","1938-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Žilpamūšis","Vandens telkinio pavadinimas":"Mūša","Vandens telkinys":"Upė, kanalas","timestamp":"2000-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.4233957,56.1939972]}},"Žilpamūšis","Mūša","Upė, kanalas","2000-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Vilnius","Vandens telkinio pavadinimas":"Vilnia","Vandens telkinys":"Upė, kanalas","timestamp":"1927-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.2948572,54.6792062]}},"Vilnius","Vilnia","Upė, kanalas","1927-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Druskininkai","Vandens telkinio pavadinimas":"Nemunas","Vandens telkinys":"Upė, kanalas","timestamp":"1877-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.9835656,54.0186554]}},"Druskininkai","Nemunas","Upė, kanalas","1877-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Panevėžys","Vandens telkinio pavadinimas":"Nevėžis","Vandens telkinys":"Upė, kanalas","timestamp":"1979-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.2679575,55.7383439]}},"Panevėžys","Nevėžis","Upė, kanalas","1979-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Žadeikiai","Vandens telkinio pavadinimas":"Pyvesa","Vandens telkinys":"Upė, kanalas","timestamp":"2006-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.4408588,56.0335073]}},"Žadeikiai","Pyvesa","Upė, kanalas","2006-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Leckava","Vandens telkinio pavadinimas":"Venta","Vandens telkinys":"Upė, kanalas","timestamp":"1939-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.231794,56.3907586]}},"Leckava","Venta","Upė, kanalas","1939-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Šarkiai","Vandens telkinio pavadinimas":"Sidabra","Vandens telkinys":"Upė, kanalas","timestamp":"2006-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.6212119,56.3089517]}},"Šarkiai","Sidabra","Upė, kanalas","2006-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Bernatoniai","Vandens telkinio pavadinimas":"Sanžilės kanalas","Vandens telkinys":"Upė, kanalas","timestamp":"1933-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.2793371,55.788824]}},"Bernatoniai","Sanžilės kanalas","Upė, kanalas","1933-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Birštonas","Vandens telkinio pavadinimas":"Kauno Marios","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"1960-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.0335785,54.6135106]}},"Birštonas","Kauno Marios","Ežeras, tvenkinys","1960-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Panemunė","Vandens telkinio pavadinimas":"Nemunas","Vandens telkinys":"Upė, kanalas","timestamp":"1995-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.9018649,55.0853685]}},"Panemunė","Nemunas","Upė, kanalas","1995-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kaunas (Kleboniškis)","Vandens telkinio pavadinimas":"Neris","Vandens telkinys":"Upė, kanalas","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.9120969,54.9367353]}},"Kaunas (Kleboniškis)","Neris","Upė, kanalas","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Lankupiai","Vandens telkinio pavadinimas":"Klaipėdos kanalas","Vandens telkinys":"Upė, kanalas","timestamp":"2006-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.3374532,55.4921838]}},"Lankupiai","Klaipėdos kanalas","Upė, kanalas","2006-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Padubysys","Vandens telkinio pavadinimas":"Dubysa","Vandens telkinys":"Upė, kanalas","timestamp":"1929-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.5034627,55.2022195]}},"Padubysys","Dubysa","Upė, kanalas","1929-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Guntauninkai","Vandens telkinio pavadinimas":"Svyla","Vandens telkinys":"Upė, kanalas","timestamp":"1962-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[26.5966409,55.2505284]}},"Guntauninkai","Svyla","Upė, kanalas","1962-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Vaineikiai","Vandens telkinio pavadinimas":"Platonis","Vandens telkinys":"Upė, kanalas","timestamp":"2006-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.5713053,56.3165681]}},"Vaineikiai","Platonis","Upė, kanalas","2006-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Jonava","Vandens telkinio pavadinimas":"Neris","Vandens telkinys":"Upė, kanalas","timestamp":"1877-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.291974,55.0749958]}},"Jonava","Neris","Upė, kanalas","1877-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kupiškis","Vandens telkinio pavadinimas":"Lėvuo","Vandens telkinys":"Upė, kanalas","timestamp":"1929-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.9328389,55.833325]}},"Kupiškis","Lėvuo","Upė, kanalas","1929-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Rimšoniai","Vandens telkinio pavadinimas":"Daugyvenė","Vandens telkinys":"Upė, kanalas","timestamp":"2006-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.9644584,56.00169]}},"Rimšoniai","Daugyvenė","Upė, kanalas","2006-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Ustukiai","Vandens telkinio pavadinimas":"Mūša","Vandens telkinys":"Upė, kanalas","timestamp":"1957-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.3705719,56.0658531]}},"Ustukiai","Mūša","Upė, kanalas","1957-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Trečionys","Vandens telkinio pavadinimas":"Tatula","Vandens telkinys":"Upė, kanalas","timestamp":"1961-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.517988,56.144994]}},"Trečionys","Tatula","Upė, kanalas","1961-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kauno HE","Vandens telkinio pavadinimas":"Nemunas","Vandens telkinys":"Upė, kanalas","timestamp":"1959-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.9956373,54.8744127]}},"Kauno HE","Nemunas","Upė, kanalas","1959-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Buivydžiai","Vandens telkinio pavadinimas":"Neris","Vandens telkinys":"Upė, kanalas","timestamp":"1966-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.7418581,54.8362574]}},"Buivydžiai","Neris","Upė, kanalas","1966-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kamorūnai","Vandens telkinio pavadinimas":"Vilkas","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.8139961,54.1193269]}},"Kamorūnai","Vilkas","Ežeras, tvenkinys","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Vilnius","Vandens telkinio pavadinimas":"Neris","Vandens telkinys":"Upė, kanalas","timestamp":"1877-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.2762418,54.691849]}},"Vilnius","Neris","Upė, kanalas","1877-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Priekulė","Vandens telkinio pavadinimas":"Minija","Vandens telkinys":"Upė, kanalas","timestamp":"2008-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.3303159,55.5499069]}},"Priekulė","Minija","Upė, kanalas","2008-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Melagė","Vandens telkinio pavadinimas":"Baltijos jūra","Vandens telkinys":"Jūra, Kuršių Marios","timestamp":"2018-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.0807566,55.7303787]}},"Melagė","Baltijos jūra","Jūra, Kuršių Marios","2018-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Valkininkai","Vandens telkinio pavadinimas":"Šalčia","Vandens telkinys":"Upė, kanalas","timestamp":"1972-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.8476998,54.3414523]}},"Valkininkai","Šalčia","Upė, kanalas","1972-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Babtai","Vandens telkinio pavadinimas":"Nevėžis","Vandens telkinys":"Upė, kanalas","timestamp":"2006-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.7839061,55.1016135]}},"Babtai","Nevėžis","Upė, kanalas","2006-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Dubininkas","Vandens telkinio pavadinimas":"Skroblus","Vandens telkinys":"Upė, kanalas","timestamp":"1976-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.3015759,54.0845507]}},"Dubininkas","Skroblus","Upė, kanalas","1976-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Nemajūnai","Vandens telkinio pavadinimas":"Nemunas","Vandens telkinys":"Upė, kanalas","timestamp":"1905-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.0719909,54.5542182]}},"Nemajūnai","Nemunas","Upė, kanalas","1905-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Tauragnai","Vandens telkinio pavadinimas":"Tauragnas","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"1955-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.8263175,55.442766]}},"Tauragnai","Tauragnas","Ežeras, tvenkinys","1955-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kudirkos Naumiestis","Vandens telkinio pavadinimas":"Šešupė","Vandens telkinys":"Upė, kanalas","timestamp":"1931-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.8660616,54.777621]}},"Kudirkos Naumiestis","Šešupė","Upė, kanalas","1931-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Papilė","Vandens telkinio pavadinimas":"Venta","Vandens telkinys":"Upė, kanalas","timestamp":"1933-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.7847074,56.1501384]}},"Papilė","Venta","Upė, kanalas","1933-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Ventė","Vandens telkinio pavadinimas":"Kuršių marios","Vandens telkinys":"Jūra, Kuršių Marios","timestamp":"2018-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.1889812,55.3394312]}},"Ventė","Kuršių marios","Jūra, Kuršių Marios","2018-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Lazinkos","Vandens telkinio pavadinimas":"Birvėta","Vandens telkinys":"Upė, kanalas","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[26.7845968,55.2847071]}},"Lazinkos","Birvėta","Upė, kanalas","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kyburiai","Vandens telkinio pavadinimas":"Yslykis","Vandens telkinys":"Upė, kanalas","timestamp":"1935-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.2385813,56.246215]}},"Kyburiai","Yslykis","Upė, kanalas","1935-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kvetkai","Vandens telkinio pavadinimas":"Nemunėlis","Vandens telkinys":"Upė, kanalas","timestamp":"2006-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.140653,56.1514428]}},"Kvetkai","Nemunėlis","Upė, kanalas","2006-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kaunas (Lampėdžiai)","Vandens telkinio pavadinimas":"Nemunas","Vandens telkinys":"Upė, kanalas","timestamp":"1930-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.817574,54.9064145]}},"Kaunas (Lampėdžiai)","Nemunas","Upė, kanalas","1930-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Paelnė","Vandens telkinio pavadinimas":"Alnis","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.7061697,55.2630742]}},"Paelnė","Alnis","Ežeras, tvenkinys","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Varėna","Vandens telkinio pavadinimas":"Varėnė","Vandens telkinys":"Upė, kanalas","timestamp":"2008-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.5557994,54.2497961]}},"Varėna","Varėnė","Upė, kanalas","2008-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Musteika","Vandens telkinio pavadinimas":"Musteika","Vandens telkinys":"Upė, kanalas","timestamp":"2021-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.3661871,53.9567951]}},"Musteika","Musteika","Upė, kanalas","2021-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Klaipėdos uostas","Vandens telkinio pavadinimas":"Baltijos jūra","Vandens telkinys":"Jūra, Kuršių Marios","timestamp":"2018-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.1191533,55.7131486]}},"Klaipėdos uostas","Baltijos jūra","Jūra, Kuršių Marios","2018-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Varniai","Vandens telkinio pavadinimas":"Stervas","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.4010427,55.7708547]}},"Varniai","Stervas","Ežeras, tvenkinys","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Lyduvėnai","Vandens telkinio pavadinimas":"Dubysa","Vandens telkinys":"Upė, kanalas","timestamp":"1933-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.089643,55.5051085]}},"Lyduvėnai","Dubysa","Upė, kanalas","1933-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Darsūniškis","Vandens telkinio pavadinimas":"Kauno Marios","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"1960-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.1136742,54.7343296]}},"Darsūniškis","Kauno Marios","Ežeras, tvenkinys","1960-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Tauragė","Vandens telkinio pavadinimas":"Jūra","Vandens telkinys":"Upė, kanalas","timestamp":"1925-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.2804527,55.2503874]}},"Tauragė","Jūra","Upė, kanalas","1925-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Girutiškė","Vandens telkinio pavadinimas":"Šventas","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[26.3182583,55.6033062]}},"Girutiškė","Šventas","Ežeras, tvenkinys","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Anykščiai","Vandens telkinio pavadinimas":"Šventoji","Vandens telkinys":"Upė, kanalas","timestamp":"1927-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.0914612,55.5209235]}},"Anykščiai","Šventoji","Upė, kanalas","1927-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Josvainiai","Vandens telkinio pavadinimas":"Šušvė","Vandens telkinys":"Upė, kanalas","timestamp":"1937-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.8327384,55.2423947]}},"Josvainiai","Šušvė","Upė, kanalas","1937-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Pažeimenė","Vandens telkinio pavadinimas":"Mera-Kūna","Vandens telkinys":"Upė, kanalas","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.9084875,54.9851375]}},"Pažeimenė","Mera-Kūna","Upė, kanalas","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Lazdėnai","Vandens telkinio pavadinimas":"Nemuno atšaka Rusnė","Vandens telkinys":"Upė, kanalas","timestamp":"1983-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.7595172,55.1242975]}},"Lazdėnai","Nemuno atšaka Rusnė","Upė, kanalas","1983-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Liukonys","Vandens telkinio pavadinimas":"Širvinta","Vandens telkinys":"Upė, kanalas","timestamp":"1970-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.6752776,55.0268158]}},"Liukonys","Širvinta","Upė, kanalas","1970-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Pajūris","Vandens telkinio pavadinimas":"Jūra","Vandens telkinys":"Upė, kanalas","timestamp":"1939-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.0204036,55.4502752]}},"Pajūris","Jūra","Upė, kanalas","1939-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Žagarė","Vandens telkinio pavadinimas":"Švėtė","Vandens telkinys":"Upė, kanalas","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.2518066,56.3601989]}},"Žagarė","Švėtė","Upė, kanalas","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Šiaulėnai","Vandens telkinio pavadinimas":"Šušvė","Vandens telkinys":"Upė, kanalas","timestamp":"1963-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.4466574,55.6756539]}},"Šiaulėnai","Šušvė","Upė, kanalas","1963-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Vaišniūnai","Vandens telkinio pavadinimas":"Baluošas","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[26.0619165,55.3877204]}},"Vaišniūnai","Baluošas","Ežeras, tvenkinys","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Plaškiai","Vandens telkinio pavadinimas":"Gėgė","Vandens telkinys":"Upė, kanalas","timestamp":"2007-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.7314135,55.1804303]}},"Plaškiai","Gėgė","Upė, kanalas","2007-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Klaipėda","Vandens telkinio pavadinimas":"Akmena-Danė","Vandens telkinys":"Upė, kanalas","timestamp":"2007-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.1409472,55.7114203]}},"Klaipėda","Akmena-Danė","Upė, kanalas","2007-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Čivonys","Vandens telkinio pavadinimas":"Šlavantas","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.6358491,54.130359]}},"Čivonys","Šlavantas","Ežeras, tvenkinys","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Verbyliškės","Vandens telkinio pavadinimas":"Verknė","Vandens telkinys":"Upė, kanalas","timestamp":"1939-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.1825073,54.5720725]}},"Verbyliškės","Verknė","Upė, kanalas","1939-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Rusnė","Vandens telkinio pavadinimas":"Nemuno atšaka Atmata","Vandens telkinys":"Upė, kanalas","timestamp":"1810-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.3807141,55.3012731]}},"Rusnė","Nemuno atšaka Atmata","Upė, kanalas","1810-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Traupis","Vandens telkinio pavadinimas":"Nevėžis","Vandens telkinys":"Upė, kanalas","timestamp":"1997-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.7467961,55.5104735]}},"Traupis","Nevėžis","Upė, kanalas","1997-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Palangos VMS","Vandens telkinio pavadinimas":"Baltijos jūra","Vandens telkinys":"Jūra, Kuršių Marios","timestamp":"2018-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.0443009,55.9203357]}},"Palangos VMS","Baltijos jūra","Jūra, Kuršių Marios","2018-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Požerė","Vandens telkinio pavadinimas":"Paršežeris","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.3006267,55.6407339]}},"Požerė","Paršežeris","Ežeras, tvenkinys","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kartena","Vandens telkinio pavadinimas":"Minija","Vandens telkinys":"Upė, kanalas","timestamp":"1924-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.4678748,55.90962]}},"Kartena","Minija","Upė, kanalas","1924-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Šilutė","Vandens telkinio pavadinimas":"Šyša","Vandens telkinys":"Upė, kanalas","timestamp":"2006-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.4758368,55.3371588]}},"Šilutė","Šyša","Upė, kanalas","2006-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kretinga","Vandens telkinio pavadinimas":"Akmena-Danė","Vandens telkinys":"Upė, kanalas","timestamp":"1991-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.2269253,55.8669415]}},"Kretinga","Akmena-Danė","Upė, kanalas","1991-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Skuodas","Vandens telkinio pavadinimas":"Bartuva","Vandens telkinys":"Upė, kanalas","timestamp":"1945-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.5083475,56.2804353]}},"Skuodas","Bartuva","Upė, kanalas","1945-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Šventoji","Vandens telkinio pavadinimas":"Šventoji","Vandens telkinys":"Upė, kanalas","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.1194584,56.0354759]}},"Šventoji","Šventoji","Upė, kanalas","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Drabužininkai","Vandens telkinio pavadinimas":"Spindžius","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.6695748,54.57273]}},"Drabužininkai","Spindžius","Ežeras, tvenkinys","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Uostadvaris","Vandens telkinio pavadinimas":"Kuršių marios","Vandens telkinys":"Jūra, Kuršių Marios","timestamp":"2018-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.2908221,55.3440158]}},"Uostadvaris","Kuršių marios","Jūra, Kuršių Marios","2018-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Miestaliai","Vandens telkinio pavadinimas":"Tenenys","Vandens telkinys":"Upė, kanalas","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.4989851,55.4331318]}},"Miestaliai","Tenenys","Upė, kanalas","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Paramėlis","Vandens telkinio pavadinimas":"Katra","Vandens telkinys":"Upė, kanalas","timestamp":"2021-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.6357787,54.0110895]}},"Paramėlis","Katra","Upė, kanalas","2021-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Jašiūnai","Vandens telkinio pavadinimas":"Merkys","Vandens telkinys":"Upė, kanalas","timestamp":"2007-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.3211746,54.433899]}},"Jašiūnai","Merkys","Upė, kanalas","2007-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Kūlynai","Vandens telkinio pavadinimas":"Leitė","Vandens telkinys":"Upė, kanalas","timestamp":"2007-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.4824605,55.2478725]}},"Kūlynai","Leitė","Upė, kanalas","2007-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Tabokinė","Vandens telkinio pavadinimas":"Nemunėlis","Vandens telkinys":"Upė, kanalas","timestamp":"1944-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.8551841,56.4141414]}},"Tabokinė","Nemunėlis","Upė, kanalas","1944-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Eidukai","Vandens telkinio pavadinimas":"Upita","Vandens telkinys":"Upė, kanalas","timestamp":"1980-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.5891914,55.590764]}},"Eidukai","Upita","Upė, kanalas","1980-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Rušiškės","Vandens telkinio pavadinimas":"Girutiškis","Vandens telkinys":"Ežeras, tvenkinys","timestamp":"2011-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[25.857363,55.2096202]}},"Rušiškės","Girutiškis","Ežeras, tvenkinys","2011-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Šilininkai","Vandens telkinio pavadinimas":"Nemunas","Vandens telkinys":"Upė, kanalas","timestamp":"1980-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[21.5666564,55.1987049]}},"Šilininkai","Nemunas","Upė, kanalas","1980-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Semeliškės","Vandens telkinio pavadinimas":"Strėva","Vandens telkinys":"Upė, kanalas","timestamp":"1961-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.658567,54.6631026]}},"Semeliškės","Strėva","Upė, kanalas","1961-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Liubavas","Vandens telkinio pavadinimas":"Šešupė","Vandens telkinys":"Upė, kanalas","timestamp":"2005-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[23.0631522,54.3574262]}},"Liubavas","Šešupė","Upė, kanalas","2005-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Pluskiai","Vandens telkinio pavadinimas":"Kražantė","Vandens telkinys":"Upė, kanalas","timestamp":"1970-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.8392558,55.5687309]}},"Pluskiai","Kražantė","Upė, kanalas","1970-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Žindaičiai","Vandens telkinio pavadinimas":"Mituva","Vandens telkinys":"Upė, kanalas","timestamp":"1945-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[22.7053046,55.1725664]}},"Žindaičiai","Mituva","Upė, kanalas","1945-01-01T00:00:00"],[{"type":"Feature","properties":{"Vandens matavimo stotis":"Bernatoniai","Vandens telkinio pavadinimas":"Lėvuo","Vandens telkinys":"Upė, kanalas","timestamp":"1930-01-01T00:00:00"},"geometry":{"type":"Point","coordinates":[24.2826131,55.7942605]}},"Bernatoniai","Lėvuo","Upė, kanalas","1930-01-01T00:00:00"]],"fields":[{"name":"_geojson","type":"geojson","format":"","analyzerType":"GEOMETRY"},{"name":"Vandens matavimo stotis","type":"string","format":"","analyzerType":"STRING"},{"name":"Vandens telkinio pavadinimas","type":"string","format":"","analyzerType":"STRING"},{"name":"Vandens telkinys","type":"string","format":"","analyzerType":"STRING"},{"name":"timestamp","type":"timestamp","format":"YYYY-M-DTH:m:s","analyzerType":"DATETIME"}],"type":"","metadata":{"id":"rewr32","format":"geojson","label":"Vandens_Stotys_Lietuviskai.geojson"},"disableDataOperation":false}}];
+            const config = {"version":"v1","config":{"visState":{"filters":[{"dataId":["rewr32"],"id":"ui9dv3568","name":["timestamp"],"type":"timeRange","value":[-5049129600000,-429844596480],"plotType":{"interval":"2-year","defaultTimeFormat":"L  LTS","type":"histogram","aggregation":"sum"},"animationWindow":"incremental","yAxis":null,"view":"enlarged","speed":0.22,"syncTimelineMode":1,"enabled":true}],"layers":[{"id":"o289nus","type":"geojson","config":{"dataId":"rewr32","columnMode":"geojson","label":"Vandens Stotys Lietuvoje","color":[82,151,218],"highlightColor":[252,242,26,255],"columns":{"geojson":"_geojson"},"isVisible":true,"visConfig":{"opacity":0.8,"strokeOpacity":0.8,"thickness":0.5,"strokeColor":null,"colorRange":{"name":"color.customPalette.custom.timestamp","type":"custom","category":"Custom","colors":["#223F9A","#9A2386","#CF1750","#FF7E26","#FAE300"]},"strokeColorRange":{"name":"Global Warming","type":"sequential","category":"Uber","colors":["#4C0035","#880030","#B72F15","#D6610A","#EF9100","#FFC300"]},"radius":10,"sizeRange":[0,10],"radiusRange":[0,50],"heightRange":[0,500],"elevationScale":5,"stroked":false,"filled":true,"enable3d":false,"wireframe":false,"fixedHeight":false},"hidden":false,"textLabel":[{"field":null,"color":[255,255,255],"size":18,"offset":[0,0],"anchor":"start","alignment":"center","outlineWidth":0,"outlineColor":[255,0,0,255],"background":false,"backgroundColor":[0,0,200,255]}]},"visualChannels":{"colorField":{"name":"timestamp","type":"timestamp"},"colorScale":"quantile","strokeColorField":null,"strokeColorScale":"quantile","sizeField":null,"sizeScale":"linear","heightField":null,"heightScale":"linear","radiusField":null,"radiusScale":"linear"}}],"effects":[],"interactionConfig":{"tooltip":{"fieldsToShow":{"rewr32":[{"name":"Vandens matavimo stotis","format":null},{"name":"Vandens telkinio pavadinimas","format":null},{"name":"Vandens telkinys","format":null}]},"compareMode":false,"compareType":"absolute","enabled":true},"brush":{"size":0.5,"enabled":false},"geocoder":{"enabled":false},"coordinate":{"enabled":false}},"layerBlending":"normal","overlayBlending":"normal","splitMaps":[],"animationConfig":{"currentTime":null,"speed":1},"editor":{"features":[],"visible":true}},"mapState":{"bearing":0,"dragRotate":false,"latitude":54.75485328386105,"longitude":22.7025375434545,"pitch":0,"zoom":6.026138009393554,"isSplit":false,"isViewportSynced":true,"isZoomLocked":false,"splitMapViewports":[]},"mapStyle":{"styleType":"positron","topLayerGroups":{},"visibleLayerGroups":{"label":true,"road":true,"border":true,"building":true,"water":true,"land":true,"3d building":false},"threeDBuildingColor":[232.7874787737094,232.7874787737094,230.92517894351974],"backgroundColor":[0,0,0],"mapStyles":{}},"uiState":{"mapControls":{"mapLegend":{"active":true,"settings":{"position":{"x":10,"anchorX":"right","y":66.39999389648438,"anchorY":"bottom"},"contentHeight":277.1625061035156}}}}}};
+
+            const loadedData = keplerGl.KeplerGlSchema.load(
+              datasets,
+              config
+            );
+
+            // For some reason Kepler overwrites the config without extra wait time
+            window.setTimeout(() => {
+              store.dispatch(
+                keplerGl.addDataToMap({
+                  datasets: loadedData.datasets,
+                  config: loadedData.config,
+                  options: {
+                    centerMap: false,
+                  },
+                })
+              );
+            }, 500);
+          }(KeplerGl, store))
+        </script>
+      </body>
+    </html>
+  
