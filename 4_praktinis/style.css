@@ -672,11 +672,8 @@ footer {
   }
 }
 
+/* === MOBILI NAVIGACIJA === */
 @media screen and (max-width: 768px) {
-  body {
-    font-size: 16px;
-  }
-
   .nav-container {
     flex-direction: row;
     justify-content: space-between;
@@ -704,15 +701,11 @@ footer {
     gap: 20px;
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 999;
   }
 
   #menu-toggle:checked + .menu-icon + .nav-list {
     display: flex;
-  }
-
-  .map-section {
-    padding: 40px 10px;
   }
 
   .map-card {
@@ -726,9 +719,5 @@ footer {
     font-size: 1.2em;
     top: -25px;
   }
-
-  footer {
-    font-size: 0.8em;
-    padding: 15px 10px;
-  }
 }
+
