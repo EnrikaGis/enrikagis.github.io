@@ -720,4 +720,29 @@ footer {
     top: -25px;
   }
 }
+@media screen and (max-width: 768px) {
+  .map-grid {
+    grid-template-columns: 1fr;
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .map-card {
+    max-width: 100%;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+
+  .map-number {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2em;
+    top: -25px;
+  }
+
+  .main-content {
+    padding-top: 80px;
+  }
+}
 
