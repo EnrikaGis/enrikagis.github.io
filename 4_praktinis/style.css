@@ -302,6 +302,8 @@ body.dark-bg {
   flex-direction: column;
   align-items: center; /* <-- Centruoja turinį horizontaliai */
   text-align: center;  /* <-- Teksto centravimas */
+   animation: fadeInUp 0.8s ease forwards;
+  opacity: 0; /* Pradinė būsena (iki animacijos) */
 }
 
 
@@ -321,7 +323,7 @@ body.dark-bg {
 }
 
 .map-card ul li {
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   font-size: 0.95em;
 }
 
@@ -418,6 +420,208 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+body.dark-bg {
+  background-color: #0b1d2a;
+  color: #f9f9f9;
+  font-family: 'Times New Roman', serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: 100px; /* nuleidžia korteles žemyn */
+}
+
+.map-section {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 40px;
+  padding: 60px 5%;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.map-card {
+  position: relative;
+  background-color: #102a3c;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  max-width: 300px;
+  width: 100%;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.map-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.6);
+  background: linear-gradient(145deg, #11344a, #0c2535);
+}
+
+.map-card h2 {
+  color: #8bd4ff;
+  font-size: 1.6em;
+  margin-bottom: 10px;
+}
+
+.map-card p {
+  color: #ccc;
+  font-style: italic;
+  margin-bottom: 15px;
+}
+
+.map-card ul {
+  list-style: none;
+  padding: 0;
+}
+
+.map-card ul li {
+  margin-bottom: 8px;
+  font-size: 1.1em; /* padidintas */
+  font-weight: bold;
+  color: #61dafb;
+  transition: color 0.3s ease;
+}
+
+.map-card ul li:hover {
+  color: #00ffff; /* švytintis efektas užvedus */
+}
+
+.map-card a {
+  color: #61dafb;
+  text-decoration: none;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+
+.map-card a:hover {
+  text-decoration: underline;
+  color: #00cfff;
+}
+
+footer {
+  background-color: #0b1d2a;
+  color: #ccc;
+  text-align: center;
+  padding: 15px;
+  font-size: 0.9em;
+  border-top: 2px solid #00cfff;
+}
+
+/* PRAKTINIŲ DARBŲ ŽENKLELIAI */
+
+.map-number {
+  position: absolute;
+  top: -45px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #00cfff;
+  color: white;
+  font-weight: bold;
+  font-size: 1.6em;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  z-index: 10;
+  transition: transform 0.3s;
+}
+
+.map-number:hover {
+  transform: translateX(-50%) scale(1.1);
+}
+
+/* === KONTAKTAI PUSLAPIS === */
+
+/* Vienodas stilius formos ir apie kūrėją sekcijoms */
+.contact-form iframe,
+.about-creator {
+  max-width: 700px;
+  width: 100%;
+  background-color: #102a3c;
+  border-radius: 16px;
+  padding: 30px;
+  margin: 40px auto;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Švelnus šešėlis */
+  animation: fadeInUp 0.6s ease;
+  transition: transform 0.3s ease;
+}
+
+.contact-form iframe:hover,
+.about-creator:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Subtilus hover efektas */
+}
+
+
+.about-creator {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+  background-color: #102a3c;
+  color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  font-size: 1.1em;
+  line-height: 1.6;
+  animation: fadeInUp 1.2s ease;
+}
+
+.about-creator h2 {
+  color: #8bd4ff;
+  font-size: 1.8em;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.about-creator p {
+  font-size: 1.1em;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  color: #f9f9f9;
+}
+
+/* Kad kontaktų antraštė nebūtų per viršų */
+.gallery-header h1 {
+  text-align: center;
+  font-size: 2.2em;
+  color: #f9f9f9;
+  margin-top: 40px;
+}
+
+/* Fade-in animacija */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 
