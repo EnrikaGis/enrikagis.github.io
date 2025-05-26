@@ -556,40 +556,28 @@ footer {
 
 /* === KONTAKTAI PUSLAPIS === */
 
-/* Vienodas stilius formos ir apie kūrėją sekcijoms */
-.contact-form iframe,
+/* === VIENODAS STILIUS KORTELEMS === */
+.contact-form,
 .about-creator {
-  max-width: 700px;
   width: 100%;
+  max-width: 800px;
   background-color: #102a3c;
   border-radius: 16px;
   padding: 30px;
-  margin: 40px auto;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Švelnus šešėlis */
-  animation: fadeInUp 0.6s ease;
-  transition: transform 0.3s ease;
-}
-
-.contact-form iframe:hover,
-.about-creator:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Subtilus hover efektas */
-}
-
-
-.about-creator {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 20px;
-  background-color: #102a3c;
+  margin: 0 auto 40px auto;
   color: #f9f9f9;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  font-size: 1.1em;
-  line-height: 1.6;
-  animation: fadeInUp 1.2s ease;
+  animation: fadeInUp 0.8s ease;
 }
 
+/* IFRAME STILIUS */
+.contact-form iframe {
+  width: 100%;
+  height: 850px;
+  border: none;
+  border-radius: 12px;
+}
+
+/* APIE KŪRĖJĄ TEKSTAS */
 .about-creator h2 {
   color: #8bd4ff;
   font-size: 1.8em;
@@ -604,7 +592,7 @@ footer {
   color: #f9f9f9;
 }
 
-/* Kad kontaktų antraštė nebūtų per viršų */
+/* KONTAKTŲ ANTRAŠTĖ */
 .gallery-header h1 {
   text-align: center;
   font-size: 2.2em;
@@ -612,7 +600,7 @@ footer {
   margin-top: 40px;
 }
 
-/* Fade-in animacija */
+/* ANIMACIJA */
 @keyframes fadeInUp {
   from {
     opacity: 0;
@@ -623,5 +611,3 @@ footer {
     transform: translateY(0);
   }
 }
-
-
