@@ -569,12 +569,17 @@ footer {
   animation: fadeInUp 0.8s ease;
 }
 
-/* IFRAME STILIUS */
+.contact-form {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 0;
+}
+
 .contact-form iframe {
   width: 100%;
   height: 850px;
   border: none;
-  border-radius: 12px;
+  border-radius: 16px;
 }
 
 /* APIE KŪRĖJĄ TEKSTAS */
