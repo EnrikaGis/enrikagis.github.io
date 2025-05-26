@@ -671,3 +671,64 @@ footer {
     padding: 15px 10px;
   }
 }
+
+@media screen and (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+
+  .nav-container {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 0 20px;
+  }
+
+  .menu-icon {
+    display: block;
+    font-size: 2em;
+    color: #fff;
+    cursor: pointer;
+  }
+
+  #menu-toggle {
+    display: none;
+  }
+
+  .nav-list {
+    display: none;
+    position: absolute;
+    top: 60px;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.9);
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  #menu-toggle:checked + .menu-icon + .nav-list {
+    display: flex;
+  }
+
+  .map-section {
+    padding: 40px 10px;
+  }
+
+  .map-card {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .map-number {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2em;
+    top: -25px;
+  }
+
+  footer {
+    font-size: 0.8em;
+    padding: 15px 10px;
+  }
+}
