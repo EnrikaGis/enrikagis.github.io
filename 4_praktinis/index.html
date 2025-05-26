@@ -1,38 +1,39 @@
 <!DOCTYPE html>
 <html lang="lt">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Interaktyvūs žemėlapiai</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman&display=swap" rel="stylesheet" />
 </head>
 <body>
 
+  <!-- Navigacija -->
+  <header class="header">
+    <div class="container nav-container">
+      <div class="logo"> </div>
+      <input type="checkbox" id="menu-toggle">
+      <label for="menu-toggle" class="menu-icon">&#9776;</label>
+      <ul class="nav-list">
+  <li><a href="#hero">Pagrindinis</a></li>
+  <li><a href="#maps">Žemėlapiai</a></li>
+  <li><a href="#contact">Kontaktai</a></li>
+</ul>
+    </div>
+  </header>
+
   <!-- Hero -->
-  <section class="hero">
+  <section class="hero" id="hero">
     <div class="hero-content">
-      <h1>INTERAKTYVŪS ŽEMĖLAPIAI</h1>
-      <p>Kepler.gl, Geoportal.lt ir ArcGIS online darbai</p>
-
-      <div class="bottom-nav">
-        <a href="maps.html">Žemėlapiai</a>
-        <a href="contact.html">Kontaktai</a>
-      </div>
+      <h1>Interaktyvūs žemėlapiai</h1>
+      <p>Sukurta naudojant Kepler.gl, Geoportal.lt ir ArcGIS Online</p>
+      <a href="#maps" class="button">Peržiūrėti darbus</a>
     </div>
-  </section>
-
-  <!-- Apie -->
-  <section class="about">
-    <div class="about-text">
-      <h2>Apie svetainę</h2>
-      <p>Ši svetainė sukurta integruoti interaktyvius žemėlapius, sukurtus Kepler.gl, Geoportal.lt ir ArcGIS Online priemonėmis. Projektas pateikia interneto technologijų ir GIS praktinių užduočių vizualizacijas ir leidžia naudotojui peržiūrėti duomenis interneto svetainėje.</p>
-    </div>
-    <img src="https://images.squarespace-cdn.com/content/v1/55223b6ee4b098a11a898a5a/1435180067240-WKD5IXSRC26BOITN9ADJ/Gis-what+we+do.jpg?format=2500w" alt="GIS vaizdas">
   </section>
 
   <footer>
     <p>© 2025 Enrika Griciūtė. Sukurta mokymosi tikslais.</p>
   </footer>
-
 </body>
 </html>
